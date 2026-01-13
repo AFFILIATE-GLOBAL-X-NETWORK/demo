@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VIP Rewards</title>
+    <!-- Font Awesome & Google Fonts -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-color: #090919;
+            --card-bg: #16162c;
+            --text-color: #ffffff;
+            --text-muted: #a0a5b9;
+            --gold: linear-gradient(135deg, #FFD700, #FDB931);
+            --diamond: linear-gradient(135deg, #00d4ff, #005bea);
+            --platinum: linear-gradient(135deg, #ff0080, #7928ca);
+            --green: #00ff88;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 480px;
+            background: #090919;
+            padding: 20px;
+            padding-bottom: 50px;
+        }
+
+        /* --- Header --- */
+        .header { display: flex; align-items: center; gap: 15px; margin-bottom: 25px; }
+        .back-btn { 
+            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); 
+            color: white; width: 40px; height: 40px; border-radius: 12px; 
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            transition: 0.3s;
+        }
+
+        /* --- Hero Status --- */
+        .vip-hero {
+            text-align: center; margin-bottom: 30px;
+            background: rgba(255,255,255,0.03); padding: 20px; border-radius: 15px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .team-counter { font-size: 2.5rem; font-weight: 800; color: white; }
+        .team-label { font-size: 0.9rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+
+        /* --- VIP Cards --- */
+        .vip-card {
+            background: var(--card-bg);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+            transition: 0.3s;
+        }
+
+        /* Card Decoration */
+        .vip-card::after {
+            content: ''; position: absolute; top: -30px; right: -30px;
+            width: 100px; height: 100px; background: rgba(255,255,255,0.05);
+            border-radius: 50%;
+        }
+
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .plan-name { font-size: 1.5rem; font-weight: 800; }
+        .status-badge { font-size: 0.75rem; padding: 4px 10px; border-radius: 10px; background: #333; color: #aaa; }
+        .status-badge.active { background: rgba(0, 255, 136, 0.2); color: #00ff88; }
+
+        /* Target & Bonus Section */
+        .info-row {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-top: 15px; padding-top: 15px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .info-box { text-align: left; }
+        .info-label { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 4px; }
+        .info-value { font-size: 1.1rem; font-weight: 700; color: white; display: flex; align-items: center; gap: 5px; }
+        
+        /* Bonus Highlight */
+        .bonus-text { color: var(--green); text-shadow: 0 0 10px rgba(0,255,136,0.3); }
+
+        /* Claim Button */
+        .btn-claim {
+            width: 100%; padding: 14px; margin-top: 20px;
+            border: none; border-radius: 12px;
+            font-weight: 800; font-size: 1rem;
+            cursor: not-allowed; 
+            background: #2a2a3d; color: #555; /* Default Locked State */
+            transition: 0.3s;
+        }
+        
+        .btn-claim.unlocked {
+            cursor: pointer;
+            background: linear-gradient(90deg, #00d4ff, #005bea); color: white;
+            box-shadow: 0 5px 15px rgba(0, 212, 255, 0.3);
+        }
+        
+        .btn-claim.claimed {
+            background: rgba(0, 255, 136, 0.1); color: #00ff88;
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            cursor: default;
+        }
+
+        /* Themes */
+        .gold-theme .plan-name { background: var(--gold); -webkit-background-clip: text; color: transparent; }
+        .gold-theme { border-left: 4px solid #ffd700; }
+        
+        .diamond-theme .plan-name { background: var(--diamond); -webkit-background-clip: text; color: transparent; }
+        .diamond-theme { border-left: 4px solid #00d4ff; }
+        
+        .platinum-theme .plan-name { background: var(--platinum); -webkit-background-clip: text; color: transparent; }
+        .platinum-theme { border-left: 4px solid #ff0080; }
+
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <!-- Header -->
+        <div class="header">
+            <button class="back-btn" onclick="location.href='home.html'"><i class="fa-solid fa-arrow-left"></i></button>
+            <h2>Team Achievements</h2>
+        </div>
+
+        <!-- Team Status -->
+        <div class="vip-hero">
+            <div class="team-label">Your Total Team</div>
+            <div class="team-counter" id="teamCount">0</div>
+            <p style="font-size: 0.8rem; color: #888; margin-top: 5px;">Refer more to unlock bonuses!</p>
+        </div>
+
+        <!-- Level 1 -->
+        <div class="vip-card gold-theme">
+            <div class="card-header">
+                <div class="plan-name">VIP 1</div>
+                <div class="status-badge" id="badge-1">Locked 🔒</div>
+            </div>
+            
+            <div class="info-row">
+                <div class="info-box">
+                    <div class="info-label">Target Referral</div>
+                    <div class="info-value"><i class="fa-solid fa-user-group"></i> 5 Members</div>
+                </div>
+                <div class="info-box" style="text-align: right;">
+                    <div class="info-label">Bonus Reward</div>
+                    <div class="info-value bonus-text">৳ 200</div>
+                </div>
+            </div>
+
+            <button class="btn-claim" id="btn-1" onclick="claimBonus(1, 5, 200)">
+                Requires 5 Referrals
+            </button>
+        </div>
+
+        <!-- Level 2 -->
+        <div class="vip-card diamond-theme">
+            <div class="card-header">
+                <div class="plan-name">VIP 2</div>
+                <div class="status-badge" id="badge-2">Locked 🔒</div>
+            </div>
+            
+            <div class="info-row">
+                <div class="info-box">
+                    <div class="info-label">Target Referral</div>
+                    <div class="info-value"><i class="fa-solid fa-users"></i> 10 Members</div>
+                </div>
+                <div class="info-box" style="text-align: right;">
+                    <div class="info-label">Bonus Reward</div>
+                    <div class="info-value bonus-text">৳ 500</div>
+                </div>
+            </div>
+
+            <button class="btn-claim" id="btn-2" onclick="claimBonus(2, 10, 500)">
+                Requires 10 Referrals
+            </button>
+        </div>
+
+        <!-- Level 3 -->
+        <div class="vip-card platinum-theme">
+            <div class="card-header">
+                <div class="plan-name">VIP 3</div>
+                <div class="status-badge" id="badge-3">Locked 🔒</div>
+            </div>
+            
+            <div class="info-row">
+                <div class="info-box">
+                    <div class="info-label">Target Referral</div>
+                    <div class="info-value"><i class="fa-solid fa-users-rays"></i> 20 Members</div>
+                </div>
+                <div class="info-box" style="text-align: right;">
+                    <div class="info-label">Bonus Reward</div>
+                    <div class="info-value bonus-text">৳ 1,500</div>
+                </div>
+            </div>
+
+            <button class="btn-claim" id="btn-3" onclick="claimBonus(3, 20, 1500)">
+                Requires 20 Referrals
+            </button>
+        </div>
+
+    </div>
+
+    <script>
+        // Initialize User & Claim History
+        let user = JSON.parse(localStorage.getItem("nexusUser"));
+        
+        // Ensure claimedRewards array exists
+        if(!user.claimedRewards) {
+            user.claimedRewards = []; 
+            localStorage.setItem("nexusUser", JSON.stringify(user));
+        }
+
+        // Display Team Count
+        document.getElementById("teamCount").innerText = user.teamSize || 0;
+
+        // Function to Update UI based on progress
+        function updateUI() {
+            const levels = [
+                { id: 1, target: 5, reward: 200 },
+                { id: 2, target: 10, reward: 500 },
+                { id: 3, target: 20, reward: 1500 }
+            ];
+
+            levels.forEach(lvl => {
+                const btn = document.getElementById(`btn-${lvl.id}`);
+                const badge = document.getElementById(`badge-${lvl.id}`);
+                
+                // Check if already claimed
+                if (user.claimedRewards.includes(lvl.id)) {
+                    btn.innerText = "Bonus Claimed ✅";
+                    btn.classList.add("claimed");
+                    btn.onclick = null;
+                    badge.innerText = "Completed";
+                    badge.classList.add("active");
+                } 
+                // Check if eligible to claim
+                else if (user.teamSize >= lvl.target) {
+                    btn.innerText = "CLAIM ৳" + lvl.reward;
+                    btn.classList.add("unlocked");
+                    badge.innerText = "Unlocked 🔓";
+                    badge.classList.add("active");
+                } 
+                // Locked state
+                else {
+                    let needed = lvl.target - user.teamSize;
+                    btn.innerText = `Need ${needed} More Refs`;
+                    btn.classList.remove("unlocked", "claimed");
+                }
+            });
+        }
+
+        // Claim Function
+        function claimBonus(id, target, amount) {
+            // Re-verify logic
+            if (user.teamSize >= target) {
+                if (!user.claimedRewards.includes(id)) {
+                    // Add Balance
+                    user.balance += amount;
+                    user.claimedRewards.push(id);
+                    
+                    // Add transaction log logic could go here
+                    user.todayProfit += amount;
+
+                    // Save
+                    localStorage.setItem("nexusUser", JSON.stringify(user));
+                    
+                    // Success UI
+                    alert(`🎉 Success! ৳${amount} Bonus Added to Wallet.`);
+                    updateUI();
+                }
+            } else {
+                alert("❌ You have not met the referral target yet.");
+            }
+        }
+
+        // Run on load
+        updateUI();
+    </script>
+</body>
+</html>
