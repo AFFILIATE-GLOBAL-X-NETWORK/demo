@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Manage Websites</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* --- CSS STYLES --- */
+        body { font-family: 'Outfit', sans-serif; background: #090909; color: #fff; margin: 0; padding: 20px; }
+        
+        /* Layout */
+        .main-wrapper { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+        
+        /* Form Section */
+        .form-container { background: #141414; padding: 30px; border-radius: 15px; border: 1px solid #333; box-shadow: 0 0 40px rgba(0,0,0,0.5); height: fit-content; position: sticky; top: 20px; }
+        
+        /* List Section */
+        .list-container { background: #141414; padding: 30px; border-radius: 15px; border: 1px solid #333; min-height: 500px; }
+
+        h2 { text-align: center; color: #00f2ff; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px; font-size: 1.5rem; }
+        h3 { border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 20px; color: #ccc; }
+
+        /* Form Elements */
+        .form-group { margin-bottom: 12px; }
+        label { display: block; margin-bottom: 6px; color: #ccc; font-size: 0.85rem; }
+        input, textarea { width: 100%; padding: 10px; background: #222; border: 1px solid #444; color: white; border-radius: 6px; box-sizing: border-box; font-family: inherit; transition: 0.3s; }
+        input:focus, textarea:focus { outline: none; border-color: #00f2ff; background: #2a2a2a; }
+        
+        .row { display: flex; gap: 10px; }
+        .col { flex: 1; }
+
+        /* Buttons */
+        .btn-submit { width: 100%; padding: 12px; background: linear-gradient(135deg, #00f2ff, #0066ff); color: white; border: none; font-size: 1rem; font-weight: bold; border-radius: 6px; cursor: pointer; margin-top: 10px; }
+        .btn-submit:hover { opacity: 0.9; }
+
+        /* Product Item Card */
+        .item-card { background: #050505; border: 1px solid #333; padding: 15px; border-radius: 10px; margin-bottom: 15px; display: flex; gap: 15px; align-items: center; transition: 0.3s; }
+        .item-card.unpublished { opacity: 0.5; border-style: dashed; }
+        
+        .item-img { width: 80px; height: 80px; object-fit: cover; border-radius: 6px; border: 1px solid #444; }
+        
+        .item-info { flex-grow: 1; }
+        .item-title { font-weight: 600; font-size: 1.1rem; color: #fff; margin-bottom: 5px; }
+        .item-meta { font-size: 0.85rem; color: #888; display: flex; gap: 10px; flex-wrap: wrap; }
+        .badge { padding: 2px 6px; border-radius: 4px; background: #222; border: 1px solid #444; }
+        
+        /* Action Buttons */
+        .actions { display: flex; flex-direction: column; gap: 5px; min-width: 100px; }
+        .btn-action { padding: 6px 10px; border: none; border-radius: 4px; cursor: pointer; font-size: 0.8rem; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 5px; color: white; transition: 0.2s; }
+        
+        .btn-edit { background: #0088cc; }
+        .btn-unpublish { background: #f39c12; }
+        .btn-delete { background: #c0392b; }
+        
+        .btn-action:hover { opacity: 0.8; transform: scale(1.02); }
+
+        /* Responsive */
+        @media (max-width: 900px) { .main-wrapper { grid-template-columns: 1fr; } .form-container { position: static; } }
+    </style>
+</head>
+<body>
+
+<div class="main-wrapper">
+    
+    <!-- LEFT SIDE: FORM -->
+    <div class="form-container">
+        <h2 id="formTitle">Upload Website</h2>
+        <form id="uploadForm">
+            <input type="hidden" id="editKey"> <!-- Hidden Field for Edit ID -->
+
+            <div class="form-group">
+                <label>Title</label>
+                <input type="text" id="title" placeholder="Website Name" required>
+            </div>
+
+            <div class="form-group">
+                <label>Category (Type manually)</label>
+                <input type="text" id="category" placeholder="e.g. E-commerce" required>
+            </div>
+
+            <!-- New Telegram Field -->
+            <div class="form-group">
+                <label>Telegram Username (No @)</label>
+                <input type="text" id="telegramId" placeholder="e.g. rakib_admin" required>
+            </div>
+
+            <div class="form-group">
+                <label>Main Image URL</label>
+                <input type="text" id="img1" required>
+            </div>
+            
+            <div class="row">
+                <div class="col form-group"><input type="text" id="img2" placeholder="Img 2 URL"></div>
+                <div class="col form-group"><input type="text" id="img3" placeholder="Img 3 URL"></div>
+                <div class="col form-group"><input type="text" id="img4" placeholder="Img 4 URL"></div>
+            </div>
+
+            <div class="row">
+                <div class="col form-group">
+                    <label>Price (TK)</label>
+                    <input type="number" id="price" required>
+                </div>
+                <div class="col form-group">
+                    <label>Discount (%)</label>
+                    <input type="number" id="discount" value="0">
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col form-group">
+                    <label>Delivery</label>
+                    <input type="text" id="delivery" placeholder="e.g. 1 Hour">
+                </div>
+                <div class="col form-group">
+                    <label>Advance (TK)</label>
+                    <input type="number" id="downpayment">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Description</label>
+                <textarea id="desc" rows="3" placeholder="Details..."></textarea>
+            </div>
+
+            <button type="submit" class="btn-submit" id="submitBtn">Publish Now</button>
+            <button type="button" id="cancelBtn" style="width:100%; padding:10px; background:#444; border:none; color:white; margin-top:5px; border-radius:6px; cursor:pointer; display:none;" onclick="resetForm()">Cancel Edit</button>
+        </form>
+    </div>
+
+    <!-- RIGHT SIDE: LIST -->
+    <div class="list-container">
+        <h3>Manage Uploaded Sites</h3>
+        <div id="websiteList">
+            <p style="text-align:center; color:#666; margin-top:50px;">Loading data...</p>
+        </div>
+    </div>
+
+</div>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyB2YLhAvSF12ZZx7LSnbqcCjtS2_8QLt4o",
+        authDomain: "task-f6078.firebaseapp.com",
+        databaseURL: "https://task-f6078-default-rtdb.firebaseio.com",
+        projectId: "task-f6078",
+        storageBucket: "task-f6078.firebasestorage.app",
+        messagingSenderId: "887907470692",
+        appId: "1:887907470692:web:c4142ac9573e19d29d3e71"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+    
+    const form = document.getElementById('uploadForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const cancelBtn = document.getElementById('cancelBtn');
+    const formTitle = document.getElementById('formTitle');
+    const listContainer = document.getElementById('websiteList');
+
+    // 1. READ DATA & RENDER LIST
+    db.ref('websites').on('value', (snapshot) => {
+        listContainer.innerHTML = '';
+        const data = snapshot.val();
+        
+        if(!data) {
+            listContainer.innerHTML = '<p style="text-align:center; color:#666">No websites found.</p>';
+            return;
+        }
+
+        // Convert object to array and reverse to show newest first
+        const items = Object.entries(data).reverse();
+
+        items.forEach(([key, item]) => {
+            const isUnpublished = item.status === 'unpublished';
+            
+            const html = `
+                <div class="item-card ${isUnpublished ? 'unpublished' : ''}">
+                    <img src="${item.images[0]}" class="item-img" onerror="this.src='https://via.placeholder.com/80'">
+                    
+                    <div class="item-info">
+                        <div class="item-title">${item.title} ${isUnpublished ? '<span style="color:orange; font-size:12px;">(Hidden)</span>' : ''}</div>
+                        <div class="item-meta">
+                            <span class="badge">৳${item.price}</span>
+                            <span class="badge">${item.category}</span>
+                            <span class="badge"><i class="fab fa-telegram"></i> ${item.telegramId || 'N/A'}</span>
+                        </div>
+                    </div>
+
+                    <div class="actions">
+                        <button class="btn-action btn-edit" onclick="editItem('${key}')">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                        <button class="btn-action btn-unpublish" onclick="togglePublish('${key}', '${item.status}')" style="background: ${isUnpublished ? '#27ae60' : '#f39c12'}">
+                            <i class="fas ${isUnpublished ? 'fa-eye' : 'fa-eye-slash'}"></i> ${isUnpublished ? 'Publish' : 'Unpublish'}
+                        </button>
+                        <button class="btn-action btn-delete" onclick="deleteItem('${key}')">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                    </div>
+                </div>
+            `;
+            listContainer.innerHTML += html;
+        });
+    });
+
+    // 2. CREATE / UPDATE DATA
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        
+        const editKey = document.getElementById('editKey').value;
+        
+        const data = {
+            title: document.getElementById('title').value,
+            category: document.getElementById('category').value,
+            telegramId: document.getElementById('telegramId').value, // Telegram ID Saved
+            images: [
+                document.getElementById('img1').value,
+                document.getElementById('img2').value,
+                document.getElementById('img3').value,
+                document.getElementById('img4').value
+            ],
+            price: document.getElementById('price').value,
+            discount: document.getElementById('discount').value || 0,
+            delivery: document.getElementById('delivery').value,
+            downPayment: document.getElementById('downpayment').value,
+            desc: document.getElementById('desc').value,
+            status: 'published', // Default status
+            timestamp: Date.now()
+        };
+
+        if (editKey) {
+            // Update Existing
+            // Keep original timestamp and status if updating
+            db.ref('websites/' + editKey).update({
+                title: data.title,
+                category: data.category,
+                telegramId: data.telegramId,
+                images: data.images,
+                price: data.price,
+                discount: data.discount,
+                delivery: data.delivery,
+                downPayment: data.downPayment,
+                desc: data.desc
+            }).then(() => {
+                alert('Website Updated Successfully!');
+                resetForm();
+            });
+        } else {
+            // Create New
+            db.ref('websites').push(data).then(() => {
+                alert('New Website Published!');
+                resetForm();
+            });
+        }
+    });
+
+    // 3. EDIT FUNCTION (Populate Form)
+    window.editItem = function(key) {
+        db.ref('websites/' + key).once('value').then((snapshot) => {
+            const data = snapshot.val();
+            
+            document.getElementById('editKey').value = key;
+            document.getElementById('title').value = data.title;
+            document.getElementById('category').value = data.category;
+            document.getElementById('telegramId').value = data.telegramId || '';
+            
+            document.getElementById('img1').value = data.images[0] || '';
+            document.getElementById('img2').value = data.images[1] || '';
+            document.getElementById('img3').value = data.images[2] || '';
+            document.getElementById('img4').value = data.images[3] || '';
+            
+            document.getElementById('price').value = data.price;
+            document.getElementById('discount').value = data.discount;
+            document.getElementById('delivery').value = data.delivery;
+            document.getElementById('downpayment').value = data.downPayment;
+            document.getElementById('desc').value = data.desc;
+
+            // Change Button Text
+            submitBtn.innerText = "Update Website";
+            submitBtn.style.background = "linear-gradient(135deg, #0088cc, #0055aa)";
+            formTitle.innerText = "Edit Website";
+            cancelBtn.style.display = "block";
+
+            // Scroll to form
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    }
+
+    // 4. UNPUBLISH / PUBLISH FUNCTION
+    window.togglePublish = function(key, currentStatus) {
+        const newStatus = (currentStatus === 'unpublished') ? 'published' : 'unpublished';
+        db.ref('websites/' + key).update({ status: newStatus });
+    }
+
+    // 5. DELETE FUNCTION
+    window.deleteItem = function(key) {
+        if(confirm('Are you sure you want to DELETE this website permanently?')) {
+            db.ref('websites/' + key).remove();
+        }
+    }
+
+    // 6. RESET FORM
+    window.resetForm = function() {
+        form.reset();
+        document.getElementById('editKey').value = "";
+        submitBtn.innerText = "Publish Now";
+        submitBtn.style.background = "linear-gradient(135deg, #00f2ff, #0066ff)";
+        formTitle.innerText = "Upload Website";
+        cancelBtn.style.display = "none";
+    }
+</script>
+
+</body>
+</html>
